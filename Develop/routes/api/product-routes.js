@@ -7,40 +7,21 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 router.get('/', async(req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
-  try{
-const data=await Product.findAll({
-  attributes:['id','product_name','price','stock'],
-  include: [{
-    model:Category,
-    attributes:['tag_name'],
-  },
-    {
-      model: Tag,
-      attributes:['tag_name'],
-
-    }
-
-  ]
-
-
-  }
-  catch {
-  
-  
-  }
-
-  });
-});
-
-// get one product
-router.get('/:id', (req, res) => {
-  // find a single product by its `id`
-  // be sure to include its associated Category and Tag data
-  try{
-
-  }
-  catch
-
+  try {
+    const productData = await Product.findAll({
+      include:[
+        {
+          model: Category, attributes: ['id',' category_id']
+        },
+        { 
+          model: Tag
+        }
+      ]
+    });
+    res.status(200).json(productData);
+  } catch (err) {
+    res.status(500).json(err);
+  }  
 });
 
 // create new product
