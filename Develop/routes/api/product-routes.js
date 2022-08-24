@@ -1,5 +1,5 @@
-const router = require('express').Router();
-const { Product, Category, Tag, ProductTag } = require('../../models');
+const router = require("express").Router();
+const { Product, Category, Tag, ProductTag } = require("../../models");
 
 // The `/api/products` endpoint
 
@@ -9,23 +9,47 @@ router.get('/', async(req, res) => {
   // be sure to include its associated Category and Tag data
   try {
     const productData = await Product.findAll({
-      include:[
+      include: [
+        Category,
         {
-          model: Category, attributes: ['id',' category_id']
+          model: Tag,
+          through: ProductTag,
         },
-        { 
-          model: Tag
-        }
-      ]
+      ],
     });
     res.status(200).json(productData);
   } catch (err) {
     res.status(500).json(err);
   }  
 });
+//get one product
+
+router.get("/:id", async (req, res) => {
+  // find one category by its `id` value
+  // be sure to include its associated Products
+  try {
+    const prodId = await Product.findByPk(req.params.id, {
+      include: [
+        {
+          model: Category,
+          attributes: ["id", "category_name"],
+        },
+        {
+          model: Tag,
+        },
+      ],
+    });
+    if (!prodId) {
+      res.status(404).json({ message: "no product is found with this ID" });
+    }
+    res.status(200).json(prodId);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
 
 // create new product
-router.post('/', (req, res) => {
+router.post("/", (req, res) => {
   /* req.body should look like this...
     {
       product_name: "Basketball",
@@ -57,7 +81,7 @@ router.post('/', (req, res) => {
 });
 
 // update product
-router.put('/:id', (req, res) => {
+router.put("/:id", (req, res) => {
   // update product data
   Product.update(req.body, {
     where: {
@@ -98,13 +122,10 @@ router.put('/:id', (req, res) => {
     });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete("/:id", (req, res) => {
   // delete one product by its `id` value
   try {
-    
-  } catch (error) {
-    
-  }
+  } catch (error) {}
 });
 
 module.exports = router;
